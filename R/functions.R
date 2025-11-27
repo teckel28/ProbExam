@@ -9,7 +9,7 @@
 #' @param lower TRUE(lower than val) or FALSE(greater than val)
 #' @return probability that the mean of a sample is greater than `val`
 #' @examples
-#' sampleMean_if_var(6, 4, 25, 6.3, TRUE)
+#' sampleMean_ifpop_var(6, 4, 25, 6.3, TRUE)
 #' @export
 sampleMean_ifpop_var <- function(m, var, n, val, lower){
   std <- sqrt(var)
@@ -19,9 +19,48 @@ sampleMean_ifpop_var <- function(m, var, n, val, lower){
 
 
 
-#'sample mean with infinite population, unknown variance, n < 30
+#' Sample mean with infinite population, unknown variance, n > 30
+#'
+#' @param m media
+#' @param S standard deviation of the sample
+#' @param n size of the sample.
+#' @param val value that the mean has to be greater/lower than
+#' @param lower TRUE(lower than val) or FALSE(greater than val)
+#' @return probability that the mean of a sample is greater than `val`
+#' @examples
+#' sampleMean_ifpop_nbig(6, 4, 25, 6.3, TRUE)
+#' @export
+sampleMean_ifpop_nbig <- function(m, var, n, val, lower){
+  normalstd <- S/sqrt(n)
+  pnorm(val, m, normalstd, lower.tail = lower)
+}
+#' Sample mean with infinite population, unknown variance, n < 30
+#'
+#' @param S standard deviation of the sample
+#' @param n size of the sample.
+#' @param val value that the mean has to be greater/lower than
+#' @param lower TRUE(lower than val) or FALSE(greater than val)
+#' @return probability that the mean of a sample is greater than `val`
+#' @examples
+#' sampleMean_ifpop_nsmall(4, 25, 8, TRUE), probability that the mean of
+#' the sample is lower than 8 with std = 4 n = 25
+#'
+#' Calculate the probability that the mean of the sample does not differ from
+#' the population mean by more than 8 units, with std = 10.85 and n = 16
+#'
+#' probMoreThanMinus8 <- sampleMean_if_pop_nsmall(10.85, 16, -8, FALSE)
+#' probMoreThan8 <- sampleMean_if_pop_nsmall(10.85, 16, 8, FALSE)
+#' probInBetween <- probMoreThan8 - probMoreThanMinus8
+#' @export
+sampleMean_ifpop_nsmall <- function(S, n, val, lower){
+  #t = (sampleMean - mean)/(sampleSigma/sqrt(n))
 
-#sample mean with infinite population, unknown variance, n > 30
+  #degrees of freedom
+  df <- n-1
+  t <- val/(S/sqrt(n))
+  #cumulative probability
+  pt(t, df, lower.tail = lower)
+}
 #sample mean with finite population, known variance
 #sample mean with finite population, unkown variance, n > 30
 
