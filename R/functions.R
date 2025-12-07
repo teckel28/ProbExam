@@ -1,6 +1,4 @@
 
-install.packages("BSDA")
-library(BSDA)
 #funciones a implementar
 
 
@@ -330,6 +328,8 @@ binomial_distribution_lower <- function(x, n, p, equal){
 #' Hypothesis test for mean of a normal distribution
 #' @export
 hypothesis_mean_normal <- function(x, mean0, type = c("two.sided", "less", "greater"), a, knownVar = NULL){
+  library(BSDA)
+
   if(is.null(knownVar)){
     if(x.length() > 30){
       z.test(x, alternative=type, mu=mean0, sigma.x=knownVar, conf.level= (1-a))
