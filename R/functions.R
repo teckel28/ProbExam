@@ -1,3 +1,6 @@
+
+install.packages("BSDA")
+library(BSDA)
 #funciones a implementar
 
 
