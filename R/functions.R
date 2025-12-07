@@ -6,12 +6,8 @@
 #' @param x dataset
 #' @export
 variance <- function(x){
-  sum <- 0
-  for(xi in x){
-    sum <- sum + xi^2
-  }
-  sum <- sum/length(x)
-  sum - mean(x)^2
+  n <- length(x)
+  var(x)*((n-1)/n)
 }
 
 
@@ -72,36 +68,70 @@ sampleMean_ifpop_novar <- function(m, S, n, val, lower){
 
 }
 
-#sample mean with finite population, known variance
-#sample mean with finite population, unkown variance, n > 30
+#' Sample mean with finite population, known variance (Marga)
+
+#' @description
+#'  This is basically for when we wnat to know the probability of the
+#' sample mean being greater/lower than x
+#' @param x is the value that we supose the mean sample takes (or lower/greater)
+#' @param n size of the sample
+#' @param m is the mean of the population (we want to know the mean of the sample)
+#' @param st is the standard deviation of the population
+#' @param N is the size of the population
+#' @param lower TRUE(lower than x) or FALSE(greater than x)
+#' @export
+sampleMean_finpop_var <- function(x,m, st, n, N, lower){
+  pnorm(x,m,((st/(sqrt(n)))*(sqrt((N-n)/(N-1)))), lower.tail = lower)
+}
+
+
+#' This is for when we want the st of the sample mean (Marga)
+#' @param n size of the sample
+#' @param st is the standart deviation of the population
+#' @param is the size of the population
+#' @export
+mean_sample_what_is_the_st_of_sample <- function(n,st,p){
+  ((st/(sqrt(n)))*(sqrt((p-n)/(p-1))))
+}
+
+
+#' Sample mean with finite population, unkown variance, n > 30 (Marga)
+#' @description This is when we what to know the probability of the
+#' sample mean beign greater than x
+#' @param x is the value that we suposse the mean sample takes (or greater)
+#' @param n size of the sample
+#' @param m is the mean of the population (we want to know the mean of the sample)
+#' @param s is the standard deviation of the population
+#' @param N is the size of the population
+#' @param lower TRUE(lower than x) or FALSE(greater than x)
+#' @export
+sampleMean_finpop_novar <- function(x,m,s,n,N, lower){
+  pnorm(x,m,(s/(sqrt(n))*(sqrt((N-n)/(N-1)))), lower.tail = lower)
+}
+
 #sample quasivariance
 #sample proportion, n > 30
 
-#' Sample mean with finite population, known variance
-#' @param x is the value that we suposse the mean sample takes (or greater)
-#' @param n size of the sample
-#' @param m is the mean of the population (we want to know the mean of the sample)
-#' @param st is the standart deviation of the population
-#' @param p is the size of the population
-#' @export
-sampleMean_finpop_var <- function(x,m, st, n, p){
-  dnorm(x,m,((st/(sqrt(n)))*(sqrt((p-n)/(p-1)))))
-}
 
-#' Sample mean with finite population, unknown variance and large n
-#' @param x is the value that we suposse the mean sample takes (or greater)
-#' @param n size of the sample
-#' @param m is the mean of the population (we want to know the mean of the sample)
-#' @param s is the desviacion muestral (ni idea de como era eso en inglés)
-#' @param p is the size of the population
-#' @export
-sampleMean_finpop_novar <- function(x,m,s,n,p){
-  dnorm(x,m,((s/sqrt(n))*(sqrt(p-n/p-1))))
-}
 
 
 #'Sample Quasivariance(S^2) distribution
-#density
+#' @param n size of the sample
+#' @param var variance of the population
+#' @param val value that we want to be greater/lower than
+#' @param lower TRUE(lower than val) or FALSE(greater than val)
+#' @export
+sample_Quasivariance <- function(n, var, val, lower){
+  df <- n-1
+  Target <- df*val/var
+  pchisq(Target, df, lower.tail = lower)
+}
+
+
+
+#' Density of sample quasivariance (Marga)
+#' @description
+#' (Benja): no estoy muy seguro que hace esto la vd pero lo dejo por si ella la quiere para algo
 #' @param n are the grades of liberty for all sample quasivariance
 #' @param x is the value we want to knoe it's density
 #' @param type "density"=dquisq, "acumulative"=pshisq, "cuantil"= qchisq
@@ -117,29 +147,16 @@ density_chisq<- function(x,n,type = c("density", "acumulative","cuantil")){
 
 }
 
-#'Sample proportion if n>30
-#' @param is the number of sucesses
-#' @param p proporcional population
+#' Sample proportion if n>30 (Marga)
+#' @param x the number of sucesses
+#' @param p proportional population
 #' @param n is the size of the sample(always over 30)
-#' @param type  "density" = dnorm, "cdf" = pnorm, "upper" = 1 - pnorm
+#' @param lower TRUE(lower than x) or FALSE(greater than x)
 #' @export
-sample_proportion_big_n <- function(x,n,p,type = c("density", "cdf", "upper")){
-  se<- sqrt(p*(1-p)/n)
+sample_proportion_big_n <- function(x,n,p,lower){
 
-  if(type == "density"){
-    return(dnorm(x, mean = p, sd = se))
-  } else if(type == "cdf"){
-    return(pnorm(x, mean = p, sd = se))
-  } else { # upper tail
-    return(1 - pnorm(x, mean = p, sd = se))
-  }
+  pnorm(x,p,sqrt(p*(1-p)/n), lower.tail = lower)
 }
-
-
-
-
-
-
 
 
 #' confidence interval for mean, known variance, normal distribution
@@ -326,25 +343,162 @@ binomial_distribution_lower <- function(x, n, p, equal){
 #Hypothesis testing
 
 #' Hypothesis test for mean of a normal distribution
+#' @importFrom BSDA z.test
+#' @param x is the dataset
+#' @param mean0 is the value we compare the mean to
+#' @param type is the alternative hypothesis: "two.sided" if H0 is = and H1 !=, "less" if H0 is > and H1 <, "greater" if H0 is < and H1 >
+#' @param a is the confidence level, for confidence 95%, a = 0.05
+#' @param knownVar variance of the population, if not known, leave NULL
+#' @return the function prints a bunch of shit, here's how to interpret:
+#'General rule: If p ≤ α → Reject H₀, If p > α → Do NOT reject H₀
 #' @export
-hypothesis_mean_normal <- function(x, mean0, type = c("two.sided", "less", "greater"), a, knownVar = NULL){
+hypothesis_mean_normal <- function(x, mean0, type = c("two.sided", "less", "greater"), a = 0.05, knownVar = NULL){
 
   type <- match.arg(type)
   if(is.null(knownVar)){
     if(length(x) > 30){
-      BSDA::z.test(x, alternative=type, mu=mean0, sigma.x=knownVar, conf.level= (1-a))
+      BSDA::z.test(x, alternative=type, mu=mean0, conf.level= (1-a))
     } else {
       t.test(x, alternative=type, mu=mean0, conf.level = (1-a))
     }
   }else{
-    BSDA::z.test(x, alternative=type, mu=mean0, sigma.x=knownVar, conf.level= (1-a))
+    BSDA::z.test(x, alternative=type, mu=mean0, sigma.x=sqrt(knownVar), conf.level= (1-a))
   }
 }
 
+#' Hypothesis test for variance of a normal distribution
+#'
+#' @param x dataset (numeric vector)
+#' @param var0 hypothesised variance σ0^2
+#' @param type is the alternative hypothesis: "two.sided" if H0 is = and H1 !=, "less" if H0 is > and H1 <, "greater" if H0 is < and H1 >
+#' @param a is the confidence level, for confidence 95%, a = 0.05
+#' @return prints test statistic and p-value (use p vs a to decide)
+#' General rule to interpret: If p ≤ a → Reject H0, if p > a → Do NOT reject H0.
+#' @export
+hypothesis_variance_normal <- function(x, var0,
+                                       type = c("two.sided", "less", "greater"),
+                                       a = 0.05) {
 
+  type <- match.arg(type)
+  n   <- length(x)
+  s2  <- var(x)
+  df  <- n - 1
 
+  # Test statistic (n-1)s^2 / var0 ~ chi^2_(n-1) under H0
+  chi <- df * s2 / var0
 
+  # p-value depending on alternative
+  if (type == "less") {
+    # H1: σ^2 < σ0^2  → lower tail
+    pval <- pchisq(chi, df = df)
+  } else if (type == "greater") {
+    # H1: σ^2 > σ0^2  → upper tail
+    pval <- 1 - pchisq(chi, df = df)
+  } else {
+    # two-sided: H1: σ^2 ≠ σ0^2
+    lower_tail  <- pchisq(chi, df = df)
+    upper_tail  <- 1 - lower_tail
+    pval <- 2 * min(lower_tail, upper_tail)
+  }
+}
 
+#' Hypothesis test for a binomial proportion
+#' @param x number of successes
+#' @param n number of trials
+#' @param p0 hypothesized proportion
+#' @param type is the alternative hypothesis: "two.sided" if H0 is = and H1 !=, "less" if H0 is > and H1 <, "greater" if H0 is < and H1 >
+#' @param a is the confidence level, for confidence 95%, a = 0.05
+#' @export
+hypothesis_proportion <- function(x, n, p0,
+                                  type = c("two.sided", "less", "greater"),
+                                  a = 0.05) {
+
+  type <- match.arg(type)
+  phat <- x / n
+  se <- sqrt(p0 * (1 - p0) / n)
+  z <- (phat - p0) / se
+
+  if (type == "less") {
+    p <- pnorm(z)
+  } else if (type == "greater") {
+    p <- 1 - pnorm(z)
+  } else {
+    p <- 2 * min(pnorm(z), 1 - pnorm(z))
+  }
+
+}
+
+#' Hypothesis test for mean of two samples
+#' @importFrom BSDA z.test
+#' @param x first dataset
+#' @param y second dataset
+#' @param type is the alternative hypothesis: "two.sided" if H0 is = and H1 !=, "less" if H0 is > and H1 <, "greater" if H0 is < and H1 >
+#' @param a is the confidence level, for confidence 95%, a = 0.05
+#' @param knownVar1 population variance of x (NULL if unknown)
+#' @param knownVar2 population variance of y (NULL if unknown)
+#' @param equalVar assume equal variances? (NULL = auto-detect)
+#' @return test output
+#' @export
+hypothesis_TwoMeans_normal <- function(x, y,
+                                    type = c("two.sided", "less", "greater"),
+                                    a = 0.05,
+                                    knownVar1 = NULL,
+                                    knownVar2 = NULL) {
+
+  type <- match.arg(type)
+  n1 <- length(x); n2 <- length(y)
+
+  # 1) CASE: KNOWN VARIANCES → Z-TEST
+  if(!is.null(knownVar1) && !is.null(knownVar2)) {
+    return(
+      BSDA::z.test(
+        x, y,
+        alternative = type,
+        sigma.x = sqrt(knownVar1),
+        sigma.y = sqrt(knownVar2),
+        conf.level = 1 - a
+      )
+    )
+  }
+
+  # 2) CASE: UNKNOWN VARIANCES, LARGE SAMPLES → Z-TEST
+  if(n1 + n2 > 30) {
+    return(
+      BSDA::z.test(
+        x, y,
+        alternative = type,
+        sigma.x = sd(x),
+        sigma.y = sd(y),
+        conf.level = 1 - a
+      )
+    )
+  }
+
+  # 3) SMALL SAMPLES → ALWAYS USE WELCH
+  t.test(
+    x, y,
+    alternative = type,
+    var.equal = FALSE,
+    conf.level = 1 - a
+  )
+}
+
+#' Hypothesis test for equality of variances (two normal pops)
+#' @param x is the first dataset
+#' @param y is the second dataset
+#' @param type is the alternative hypothesis: "two.sided" if H0 is = and H1 !=, "less" if H0 is > and H1 <, "greater" if H0 is < and H1 >
+#' @param a is the confidence level, for confidence 95%, a = 0.05
+#' @export
+hypothesis_TwoVariances <- function(x, y,
+                                 type = c("two.sided", "less", "greater"),
+                                 a = 0.05) {
+
+  type <- match.arg(type)
+
+  var.test(x, y,
+           alternative = type,
+           conf.level = 1 - a)
+}
 
 
 
