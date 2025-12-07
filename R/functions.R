@@ -1,5 +1,20 @@
 #funciones a implementar
 
+
+#' Variance of a sample
+#' @param x dataset
+#' @export
+variance <- function(x){
+  sum <- 0
+  for(xi in x){
+    sum <- sum + xi^2
+  }
+  sum <- sum/length(x)
+  sum - mean(x)^2
+}
+
+
+
 #' Sample mean with infinite population, known variance
 #'
 #' @param m media
@@ -63,13 +78,78 @@ sampleMean_ifpop_novar <- function(m, S, n, val, lower){
 
 #sample proportion, n > 30
 
+#' Sample mean with finite population, known variance
+#' @param x is the value that we suposse the mean sample takes (or greater)
+#' @param n size of the sample
+#' @param m is the mean of the population (we want to know the mean of the sample)
+#' @param st is the standart deviation of the population
+#' @param p is the size of the population
+#' @export
+sampleMean_finpop_var <- function(x,m, st, n, p){
+  dnorm(x,m,((st/(sqrt(n)))*(sqrt((p-n)/(p-1)))))
+}
+
+#' Sample mean with finite population, unknown variance and large n
+#' @param x is the value that we suposse the mean sample takes (or greater)
+#' @param n size of the sample
+#' @param m is the mean of the population (we want to know the mean of the sample)
+#' @param s is the desviacion muestral (ni idea de como era eso en inglés)
+#' @param p is the size of the population
+#' @export
+sampleMean_finpop_novar <- function(x,m,s,n,p){
+  dnorm(x,m,((s/sqrt(n))*(sqrt(p-n/p-1))))
+}
+
+
+#'Sample Quasivariance(S^2) distribution
+#density
+#' @param n are the grades of liberty for all sample quasivariance
+#' @param x is the value we want to knoe it's density
+#' @param type "density"=dquisq, "acumulative"=pshisq, "cuantil"= qchisq
+#' @export
+density_chisq<- function(x,n,type = c("density", "acumulative","cuantil")){
+  if(type == "density"){
+    return(dquisq(x,n))
+  } else if(type == "cdf"){
+    return(pchisq(x,n))
+  } else { # cuantil
+    return(qchisq(x,n))
+  }
+
+}
+
+#'Sample proportion if n>30
+#' @param is the number of sucesses
+#' @param p proporcional population
+#' @param n is the size of the sample(always over 30)
+#' @param type  "density" = dnorm, "cdf" = pnorm, "upper" = 1 - pnorm
+#' @export
+sample_proportion_big_n <- function(x,n,p,type = c("density", "cdf", "upper")){
+  se<- sqrt(p*(1-p)/n)
+
+  if(type == "density"){
+    return(dnorm(x, mean = p, sd = se))
+  } else if(type == "cdf"){
+    return(pnorm(x, mean = p, sd = se))
+  } else { # upper tail
+    return(1 - pnorm(x, mean = p, sd = se))
+  }
+}
+
+
+
+
+
+
+
+
 #' confidence interval for mean, known variance, normal distribution
 #' @param n size of the sample
 #' @param mean mean of the sample
 #' @param var variance of the ENTIRE POPULATION (NOT SAMPLE)
 #' @param a confidence interval we want, for 95% confidence, a = 0.05, for 90% confidence, a = 0.1
-#' @return print confidence interval for the ACTUAL p in the distribution
-#'
+#' @return print confidence interval for the ACTUAL mean in the distribution
+#' @export
 confidence_normalMean_var <- function(n, mean, var, a){
   z <- qnorm(a/2, lower.tail = FALSE)
   e <- z*sqrt(var/n)
@@ -82,7 +162,7 @@ confidence_normalMean_var <- function(n, mean, var, a){
 #' @param S standard deviation of the sample
 #' @param a confidence interval we want, for 95% confidence, a = 0.05, for 90% confidence, a = 0.1
 #' @return print confidence interval for the ACTUAL mean in the distribution
-#'
+#' @export
 confidence_normalMean_novar <- function(n, mean, S, a){
   if(n > 30){
     z <- qnorm(a/2, lower.tail = FALSE)
@@ -103,11 +183,11 @@ confidence_normalMean_novar <- function(n, mean, S, a){
 #' @param S standard deviation of the sample
 #' @param a confidence interval we want, for 95% confidence, a = 0.05, for 90% confidence, a = 0.1
 #' @return print confidence interval for the ACTUAL variance in the distribution
-#'
+#' @export
 confidence_normalVariance <- function(n, S, a){
   df <- n-1
-  chiLow <- qchisq(a/2, df, lower.tail = TRUE)
-  chiHigh <- qchisq(a/2, df, lower.tail = FALSE)
+  chiLow <- qchisq(1- a/2, df)
+  chiHigh <- qchisq(a/2, df)
   e <- df*S^2
   print(e/chiLow)
   print(e/chiHigh)
@@ -115,10 +195,10 @@ confidence_normalVariance <- function(n, S, a){
 
 #' Confidence interval for p, binomial distribution
 #' @param n size of the sample
-#' @param phat probability of succes in the sample
+#' @param phat probability of success in the sample
 #' @param a confidence interval we want, for 95% confidence, a = 0.05, for 90% confidence, a = 0.1
 #' @return print confidence interval for the ACTUAL p in the distribution
-#'
+#' @export
 confidence_binomial <- function(n, phat, a){
   z <- qnorm(a/2, lower.tail = FALSE)
   e <- z*sqrt((phat*(1-phat))/n)
@@ -126,10 +206,39 @@ confidence_binomial <- function(n, phat, a){
   print(phat + e)
 }
 
-#confidence interval for difference of means, known variance
-#confidence interval for difference of means, unknown variance, n1+n2 > 30,
-#confidence interval for difference of means, unknown variance, n1+n2 < 30, equal sample var
-#confidence interval for difference of means, unknown variance, n1+n2 < 30, diff sample var
+#' Confidence interval for difference of means, known population variances, normal distributions
+#' @param mean1 mean of the first sample
+#' @param mean2 mean of the second sample
+#' @param var1 variance of the first POPULATION (NOT SAMPLE)
+#' @param var2 variance of the second POPULATION (NOT SAMPLE)
+#' @param n1 size of the first sample
+#' @param n2 size of the second sample
+#' @param a confidence interval we want, for 95% confidence, a = 0.05, for 90% confidence, a = 0.1
+#' @return print confidence interval for the difference of means in two normal distributions
+#' @export
+confidence_diferenceMeans_var <- function(mean1, mean2, var1, var2, n1, n2, a){
+  z <- qnorm(a/2, lower.tail = FALSE)
+  e <- z*sqrt((var1/n1) + (var2/n2))
+  print(mean1 - mean2 - e)
+  print(mean1 - mean2 + e)
+}
+
+#' Confidence interval for difference of means, unknown variance
+#' @param x dataset 1
+#' @param y dataset 2
+#' @param a confidence interval we want, for 95% confidence, a = 0.05, for 90% confidence, a = 0.1
+#' @return print confidence interval for the difference of means in two normal distributions
+#' @export
+confidence_diferenceMeans_novar <- function(x, y, a){
+  if(n1 + n2 <= 30){
+    t.test(x, y, conf.level = a)
+  }else{
+    z <- qnorm(a/2, lower.tail = FALSE)
+    e <- z*sqrt((variance(x)/length(x)) + (variance(y)/length(y)))
+    print((mean(x)-mean(y)) - e)
+    print((mean(x)-mean(y)) + e)
+  }
+}
 
 #confidence interval for ratio of variances of 2 normal distributions
 
