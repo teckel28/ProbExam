@@ -109,7 +109,7 @@ sampleMean_finpop_novar <- function(x,m,s,n,p){
 #' @export
 density_chisq<- function(x,n,type = c("density", "acumulative","cuantil")){
   if(type == "density"){
-    return(dquisq(x,n))
+    return(dchisq(x,n))
   } else if(type == "cdf"){
     return(pchisq(x,n))
   } else { # cuantil
@@ -257,7 +257,7 @@ confidence_diferenceMeans_novar <- function(x, y, a){
 #' binomial_distribution(3, 20, 0.6)
 #' @export
 binomial_distribution_exactly <- function(x, n, p){
-  (choose(n,x))(p^x)((1-p)^(n-x))
+  (choose(n,x))*(p^x)*((1-p)^(n-x))
 }
 
 #' Binomial probability X > x
@@ -275,8 +275,8 @@ binomial_distribution_greater <- function(x, n, p, equal){
   if(equal){
     include <- 0
   }
-  for(i in (x+include):n+1){
-    sum <- sum + (choose(n,i))(p^i)((1-p)^(n-i))
+  for(i in (x+include):(n+1)){
+    sum <- sum + (choose(n,i))*(p^i)*((1-p)^(n-i))
   }
   sum
 }
@@ -296,10 +296,9 @@ binomial_distribution_lower <- function(x, n, p, equal){
   if(equal){
     include <- 1
   }
-  for(i in 0:x+include){
-    sum <- sum + (choose(n,i))(p^i)((1-p)^(n-i))
+  for(i in 0:(x+include)){
+    sum <- sum + (choose(n,i))*(p^i)*((1-p)^(n-i))
   }
   sum
 }
-
 
