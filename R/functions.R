@@ -231,7 +231,7 @@ confidence_diferenceMeans_var <- function(mean1, mean2, var1, var2, n1, n2, a){
 #' @export
 confidence_diferenceMeans_novar <- function(x, y, a){
   if(n1 + n2 <= 30){
-    t.test(x, y, conf.level = a)
+    t.test(x, y, conf.level = (1-a))
   }else{
     z <- qnorm(a/2, lower.tail = FALSE)
     e <- z*sqrt((variance(x)/length(x)) + (variance(y)/length(y)))
