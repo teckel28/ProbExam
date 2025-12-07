@@ -2,21 +2,24 @@
 % Please edit documentation in R/functions.R
 \name{sampleMean_finpop_novar}
 \alias{sampleMean_finpop_novar}
-\title{Sample mean with finite population, unknown variance and large n}
+\title{Sample mean with finite population, unkown variance, n > 30 (Marga)}
 \usage{
-sampleMean_finpop_novar(x, m, s, n, p)
+sampleMean_finpop_novar(x, m, s, n, N, lower)
 }
 \arguments{
 \item{x}{is the value that we suposse the mean sample takes (or greater)}
 
 \item{m}{is the mean of the population (we want to know the mean of the sample)}
 
-\item{s}{is the desviacion muestral (ni idea de como era eso en inglés)}
+\item{s}{is the standard deviation of the population}
 
 \item{n}{size of the sample}
 
-\item{p}{is the size of the population}
+\item{N}{is the size of the population}
+
+\item{lower}{TRUE(lower than x) or FALSE(greater than x)}
 }
 \description{
-Sample mean with finite population, unknown variance and large n
+This is when we what to know the probability of the
+sample mean beign greater than x
 }

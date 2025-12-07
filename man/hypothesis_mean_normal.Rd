@@ -8,9 +8,24 @@ hypothesis_mean_normal(
   x,
   mean0,
   type = c("two.sided", "less", "greater"),
-  a,
+  a = 0.05,
   knownVar = NULL
 )
+}
+\arguments{
+\item{x}{is the dataset}
+
+\item{mean0}{is the value we compare the mean to}
+
+\item{type}{is the alternative hypothesis: "two.sided" if H0 is = and H1 !=, "less" if H0 is > and H1 <, "greater" if H0 is < and H1 >}
+
+\item{a}{is the confidence level, for confidence 95\%, a = 0.05}
+
+\item{knownVar}{variance of the population, if not known, leave NULL}
+}
+\value{
+the function prints a bunch of shit, here's how to interpret:
+General rule: If p ≤ α → Reject H₀, If p > α → Do NOT reject H₀
 }
 \description{
 Hypothesis test for mean of a normal distribution

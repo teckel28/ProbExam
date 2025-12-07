@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{density_chisq}
 \alias{density_chisq}
-\title{Sample Quasivariance(S^2) distribution}
+\title{Density of sample quasivariance (Marga)}
 \usage{
 density_chisq(x, n, type = c("density", "acumulative", "cuantil"))
 }
@@ -14,5 +14,5 @@ density_chisq(x, n, type = c("density", "acumulative", "cuantil"))
 \item{type}{"density"=dquisq, "acumulative"=pshisq, "cuantil"= qchisq}
 }
 \description{
-Sample Quasivariance(S^2) distribution
+(Benja): no estoy muy seguro que hace esto la vd pero lo dejo por si ella la quiere para algo
 }

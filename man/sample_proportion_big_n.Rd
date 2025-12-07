@@ -2,19 +2,19 @@
 % Please edit documentation in R/functions.R
 \name{sample_proportion_big_n}
 \alias{sample_proportion_big_n}
-\title{Sample proportion if n>30}
+\title{Sample proportion if n>30 (Marga)}
 \usage{
-sample_proportion_big_n(x, n, p, type = c("density", "cdf", "upper"))
+sample_proportion_big_n(x, n, p, lower)
 }
 \arguments{
+\item{x}{the number of sucesses}
+
 \item{n}{is the size of the sample(always over 30)}
 
-\item{p}{proporcional population}
+\item{p}{proportional population}
 
-\item{type}{"density" = dnorm, "cdf" = pnorm, "upper" = 1 - pnorm}
-
-\item{is}{the number of sucesses}
+\item{lower}{TRUE(lower than x) or FALSE(greater than x)}
 }
 \description{
-Sample proportion if n>30
+Sample proportion if n>30 (Marga)
 }

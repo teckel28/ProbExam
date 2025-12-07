@@ -2,21 +2,24 @@
 % Please edit documentation in R/functions.R
 \name{sampleMean_finpop_var}
 \alias{sampleMean_finpop_var}
-\title{Sample mean with finite population, known variance}
+\title{Sample mean with finite population, known variance (Marga)}
 \usage{
-sampleMean_finpop_var(x, m, st, n, p)
+sampleMean_finpop_var(x, m, st, n, N, lower)
 }
 \arguments{
-\item{x}{is the value that we suposse the mean sample takes (or greater)}
+\item{x}{is the value that we supose the mean sample takes (or lower/greater)}
 
 \item{m}{is the mean of the population (we want to know the mean of the sample)}
 
-\item{st}{is the standart deviation of the population}
+\item{st}{is the standard deviation of the population}
 
 \item{n}{size of the sample}
 
-\item{p}{is the size of the population}
+\item{N}{is the size of the population}
+
+\item{lower}{TRUE(lower than x) or FALSE(greater than x)}
 }
 \description{
-Sample mean with finite population, known variance
+This is basically for when we wnat to know the probability of the
+sample mean being greater/lower than x
 }
