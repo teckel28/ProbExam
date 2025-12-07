@@ -73,9 +73,7 @@ sampleMean_ifpop_novar <- function(m, S, n, val, lower){
 
 #sample mean with finite population, known variance
 #sample mean with finite population, unkown variance, n > 30
-
 #sample quasivariance
-
 #sample proportion, n > 30
 
 #' Sample mean with finite population, known variance
@@ -241,8 +239,29 @@ confidence_diferenceMeans_novar <- function(x, y, a){
 }
 
 #confidence interval for ratio of variances of 2 normal distributions
+#' Confidence interval for difference of means, unknown variance
+#' @param x dataset 1
+#' @param y dataset 2
+#' @param a confidence interval we want, for 95% confidence, a = 0.05, for 90% confidence, a = 0.1
+#' @return print confidence interval for the difference of means in two normal distributions
+#' @export
+confidence_ratioVariances_normal <- function(x, y, a){
+  var.test(x, y, conf.level = (1-a))
+}
 
-#confidence interval for difference of (p1 - p2) of 2 binomial distributions
+#' Confidence interval for difference of (p1 - p2) of 2 binomial distributions
+#' @param p1 proportion of success of the first sample
+#' @param p2 proportion of success of the second sample
+#' @param n1 size of the first sample
+#' @param n2 size of the second sample
+#' @param a alpha of the confidence interval, for 95% confidence, a = 0.05
+#' @export
+confidence_differenceProportions_binomial <- function(p1, p2, n1, n2, a){
+  z <- qnorm(a/2, lower.tail = FALSE)
+  e <- z*sqrt((p1*(1-p1)/n1)*(p2*(1-p2)/n2))
+  print(p1-p2-e)
+  print(p1-p2+e)
+}
 
 
 
@@ -301,4 +320,33 @@ binomial_distribution_lower <- function(x, n, p, equal){
   }
   sum
 }
+
+
+#Hypothesis testing
+
+#' Hypothesis test for mean of a normal distribution
+#' @export
+hypothesis_mean_normal <- function(x, mean0, type = c("two.sided", "less", "greater"), a, knownVar = NULL){
+  if(knownVar.isnull()){
+    if(x.length() > 30){
+      z.test(x, alternative=type, mu=mean0, sigma.x=knownVar, conf.level= (1-a))
+    } else {
+      t.test(x, alternative=type, mu=mean0, conf.level = (1-a))
+    }
+  }else{
+    z.test(x, alternative=type, mu=mean0, sigma.x=knownVar, conf.level= (1-a))
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
