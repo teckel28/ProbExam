@@ -329,9 +329,9 @@ binomial_distribution_lower <- function(x, n, p, equal){
 #' @export
 hypothesis_mean_normal <- function(x, mean0, type = c("two.sided", "less", "greater"), a, knownVar = NULL){
 
-
+  type <- match.arg(type)
   if(is.null(knownVar)){
-    if(x.length() > 30){
+    if(length(x) > 30){
       BSDA::z.test(x, alternative=type, mu=mean0, sigma.x=knownVar, conf.level= (1-a))
     } else {
       t.test(x, alternative=type, mu=mean0, conf.level = (1-a))
