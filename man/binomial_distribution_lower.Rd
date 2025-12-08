@@ -21,6 +21,3 @@ probability that if we do the experiment \code{n} times we have \code{x} or less
 \description{
 Binomial probability for X < x
 }
-\examples{
-binomial_distribution(3, 20, 0.6, FALSE)
-}

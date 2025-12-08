@@ -7,7 +7,7 @@
 sampleMean_ifpop_novar(m, S, n, val, lower)
 }
 \arguments{
-\item{m}{media}
+\item{m}{mean of the population (NULL if you dont have)}
 
 \item{S}{standard deviation of the sample}
 
@@ -26,14 +26,15 @@ Sample mean with infinite population, unknown variance
 \examples{
 sampleMean_ifpop_novar(6, 4, 25, 6.3, TRUE)
 
-exercise example
-sampleMean_ifpop_novar(4, 25, 8, TRUE), probability that the mean of
-the sample is lower than 8 with std = 4 n = 25
+#exercise example
+sampleMean_ifpop_novar(12, 4, 25, 8, TRUE)
+# probability that the mean of
+#the sample is lower than 8 with std = 4 n = 25
 
-Calculate the probability that the mean of the sample does not differ from
-the population mean by more than 8 units, with std = 10.85 and n = 16
+#Calculate the probability that the mean of the sample does not differ from
+#the population mean by more than 8 units, with std = 10.85 and n = 16
 
-probMoreThanMinus8 <- sampleMean_ifpop_novar(10.85, 16, -8, FALSE)
-probMoreThan8 <- sampleMean_ifpop_novar(10.85, 16, 8, FALSE)
-probInBetween <- probMoreThan8 - probMoreThanMinus8
+probMoreThanMinus8 <- sampleMean_ifpop_novar(NULL, 10.85, 16, -8, FALSE)
+probMoreThan8 <- sampleMean_ifpop_novar(NULL, 10.85, 16, 8, FALSE)
+probInBetween <- probMoreThanMinus8 - probMoreThan8
 }

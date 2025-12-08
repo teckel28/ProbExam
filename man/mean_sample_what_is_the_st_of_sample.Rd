@@ -11,7 +11,7 @@ mean_sample_what_is_the_st_of_sample(n, st, p)
 
 \item{st}{is the standart deviation of the population}
 
-\item{is}{the size of the population}
+\item{p}{is the size of the population}
 }
 \description{
 This is for when we want the st of the sample mean (Marga)

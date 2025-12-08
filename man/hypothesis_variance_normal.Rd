@@ -12,9 +12,9 @@ hypothesis_variance_normal(
 )
 }
 \arguments{
-\item{x}{dataset (numeric vector)}
+\item{x}{dataset}
 
-\item{var0}{hypothesised variance σ0^2}
+\item{var0}{hypothesised variance}
 
 \item{type}{is the alternative hypothesis: "two.sided" if H0 is = and H1 !=, "less" if H0 is > and H1 <, "greater" if H0 is < and H1 >}
 
@@ -22,7 +22,7 @@ hypothesis_variance_normal(
 }
 \value{
 prints test statistic and p-value (use p vs a to decide)
-General rule to interpret: If p ≤ a → Reject H0, if p > a → Do NOT reject H0.
+General rule: If p <= a  Reject H0, If p > a  Do NOT reject H0
 }
 \description{
 Hypothesis test for variance of a normal distribution

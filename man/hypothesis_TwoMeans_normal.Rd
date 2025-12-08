@@ -25,8 +25,6 @@ hypothesis_TwoMeans_normal(
 \item{knownVar1}{population variance of x (NULL if unknown)}
 
 \item{knownVar2}{population variance of y (NULL if unknown)}
-
-\item{equalVar}{assume equal variances? (NULL = auto-detect)}
 }
 \value{
 test output

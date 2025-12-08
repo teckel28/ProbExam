@@ -25,7 +25,7 @@ hypothesis_mean_normal(
 }
 \value{
 the function prints a bunch of shit, here's how to interpret:
-General rule: If p ≤ α → Reject H₀, If p > α → Do NOT reject H₀
+General rule: If p <= a  Reject H0, If p > a  Do NOT reject H0
 }
 \description{
 Hypothesis test for mean of a normal distribution

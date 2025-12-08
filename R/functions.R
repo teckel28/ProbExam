@@ -32,7 +32,7 @@ sampleMean_ifpop_var <- function(m, var, n, val, lower){
 
 #' Sample mean with infinite population, unknown variance
 #'
-#' @param m media
+#' @param m mean of the population (NULL if you dont have)
 #' @param S standard deviation of the sample
 #' @param n size of the sample.
 #' @param val value that the mean has to be greater/lower than
@@ -41,16 +41,17 @@ sampleMean_ifpop_var <- function(m, var, n, val, lower){
 #' @examples
 #' sampleMean_ifpop_novar(6, 4, 25, 6.3, TRUE)
 #'
-#' exercise example
-#' sampleMean_ifpop_novar(4, 25, 8, TRUE), probability that the mean of
-#' the sample is lower than 8 with std = 4 n = 25
+#' #exercise example
+#' sampleMean_ifpop_novar(12, 4, 25, 8, TRUE)
+#' # probability that the mean of
+#' #the sample is lower than 8 with std = 4 n = 25
 #'
-#' Calculate the probability that the mean of the sample does not differ from
-#' the population mean by more than 8 units, with std = 10.85 and n = 16
+#' #Calculate the probability that the mean of the sample does not differ from
+#' #the population mean by more than 8 units, with std = 10.85 and n = 16
 #'
-#' probMoreThanMinus8 <- sampleMean_ifpop_novar(10.85, 16, -8, FALSE)
-#' probMoreThan8 <- sampleMean_ifpop_novar(10.85, 16, 8, FALSE)
-#' probInBetween <- probMoreThan8 - probMoreThanMinus8
+#' probMoreThanMinus8 <- sampleMean_ifpop_novar(NULL, 10.85, 16, -8, FALSE)
+#' probMoreThan8 <- sampleMean_ifpop_novar(NULL, 10.85, 16, 8, FALSE)
+#' probInBetween <- probMoreThanMinus8 - probMoreThan8
 #' @export
 sampleMean_ifpop_novar <- function(m, S, n, val, lower){
   if(n < 30){
@@ -88,7 +89,7 @@ sampleMean_finpop_var <- function(x,m, st, n, N, lower){
 #' This is for when we want the st of the sample mean (Marga)
 #' @param n size of the sample
 #' @param st is the standart deviation of the population
-#' @param is the size of the population
+#' @param p is the size of the population
 #' @export
 mean_sample_what_is_the_st_of_sample <- function(n,st,p){
   ((st/(sqrt(n)))*(sqrt((p-n)/(p-1))))
@@ -290,8 +291,6 @@ confidence_differenceProportions_binomial <- function(p1, p2, n1, n2, a){
 #' @param n number of times the experiment was done
 #' @param p probability of success of the experiment
 #' @return probability that if we do the experiment `n` times we have `x` successes
-#' @examples
-#' binomial_distribution(3, 20, 0.6)
 #' @export
 binomial_distribution_exactly <- function(x, n, p){
   (choose(n,x))*(p^x)*((1-p)^(n-x))
@@ -303,8 +302,6 @@ binomial_distribution_exactly <- function(x, n, p){
 #' @param p probability of success of the experiment
 #' @param equal TRUE for including x (>=) FALSE to not include x (>)
 #' @return probability that if we do the experiment `n` times we have `x`or more successes
-#' @examples
-#' binomial_distribution(3, 20, 0.6, FALSE)
 #' @export
 binomial_distribution_greater <- function(x, n, p, equal){
   sum <- 0
@@ -324,8 +321,6 @@ binomial_distribution_greater <- function(x, n, p, equal){
 #' @param p probability of success of the experiment
 #' @param equal TRUE for including x (<=) FALSE to not include x (<)
 #' @return probability that if we do the experiment `n` times we have `x` or less successes
-#' @examples
-#' binomial_distribution(3, 20, 0.6, FALSE)
 #' @export
 binomial_distribution_lower <- function(x, n, p, equal){
   sum <- 0
@@ -350,7 +345,7 @@ binomial_distribution_lower <- function(x, n, p, equal){
 #' @param a is the confidence level, for confidence 95%, a = 0.05
 #' @param knownVar variance of the population, if not known, leave NULL
 #' @return the function prints a bunch of shit, here's how to interpret:
-#'General rule: If p ≤ α → Reject H₀, If p > α → Do NOT reject H₀
+#'General rule: If p <= a  Reject H0, If p > a  Do NOT reject H0
 #' @export
 hypothesis_mean_normal <- function(x, mean0, type = c("two.sided", "less", "greater"), a = 0.05, knownVar = NULL){
 
@@ -368,12 +363,12 @@ hypothesis_mean_normal <- function(x, mean0, type = c("two.sided", "less", "grea
 
 #' Hypothesis test for variance of a normal distribution
 #'
-#' @param x dataset (numeric vector)
-#' @param var0 hypothesised variance σ0^2
+#' @param x dataset
+#' @param var0 hypothesised variance
 #' @param type is the alternative hypothesis: "two.sided" if H0 is = and H1 !=, "less" if H0 is > and H1 <, "greater" if H0 is < and H1 >
 #' @param a is the confidence level, for confidence 95%, a = 0.05
 #' @return prints test statistic and p-value (use p vs a to decide)
-#' General rule to interpret: If p ≤ a → Reject H0, if p > a → Do NOT reject H0.
+#'General rule: If p <= a  Reject H0, If p > a  Do NOT reject H0
 #' @export
 hypothesis_variance_normal <- function(x, var0,
                                        type = c("two.sided", "less", "greater"),
@@ -384,18 +379,18 @@ hypothesis_variance_normal <- function(x, var0,
   s2  <- var(x)
   df  <- n - 1
 
-  # Test statistic (n-1)s^2 / var0 ~ chi^2_(n-1) under H0
+
   chi <- df * s2 / var0
 
   # p-value depending on alternative
   if (type == "less") {
-    # H1: σ^2 < σ0^2  → lower tail
+
     pval <- pchisq(chi, df = df)
   } else if (type == "greater") {
-    # H1: σ^2 > σ0^2  → upper tail
+
     pval <- 1 - pchisq(chi, df = df)
   } else {
-    # two-sided: H1: σ^2 ≠ σ0^2
+    # two-sided
     lower_tail  <- pchisq(chi, df = df)
     upper_tail  <- 1 - lower_tail
     pval <- 2 * min(lower_tail, upper_tail)
@@ -436,7 +431,6 @@ hypothesis_proportion <- function(x, n, p0,
 #' @param a is the confidence level, for confidence 95%, a = 0.05
 #' @param knownVar1 population variance of x (NULL if unknown)
 #' @param knownVar2 population variance of y (NULL if unknown)
-#' @param equalVar assume equal variances? (NULL = auto-detect)
 #' @return test output
 #' @export
 hypothesis_TwoMeans_normal <- function(x, y,
@@ -448,7 +442,7 @@ hypothesis_TwoMeans_normal <- function(x, y,
   type <- match.arg(type)
   n1 <- length(x); n2 <- length(y)
 
-  # 1) CASE: KNOWN VARIANCES → Z-TEST
+  # 1) CASE: KNOWN VARIANCES  Z-TEST
   if(!is.null(knownVar1) && !is.null(knownVar2)) {
     return(
       BSDA::z.test(
@@ -461,7 +455,7 @@ hypothesis_TwoMeans_normal <- function(x, y,
     )
   }
 
-  # 2) CASE: UNKNOWN VARIANCES, LARGE SAMPLES → Z-TEST
+  # 2) CASE: UNKNOWN VARIANCES, LARGE SAMPLES  Z-TEST
   if(n1 + n2 > 30) {
     return(
       BSDA::z.test(

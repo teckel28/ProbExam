@@ -19,6 +19,3 @@ probability that if we do the experiment \code{n} times we have \code{x} success
 \description{
 Binomial probability
 }
-\examples{
-binomial_distribution(3, 20, 0.6)
-}
