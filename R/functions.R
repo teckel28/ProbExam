@@ -277,7 +277,7 @@ confidence_ratioVariances_normal <- function(x, y, a){
 #' @export
 confidence_differenceProportions_binomial <- function(p1, p2, n1, n2, a){
   z <- qnorm(a/2, lower.tail = FALSE)
-  e <- z*sqrt((p1*(1-p1)/n1)*(p2*(1-p2)/n2))
+  e <- z*sqrt((p1*(1-p1)/n1)+(p2*(1-p2)/n2))
   print(p1-p2-e)
   print(p1-p2+e)
 }
@@ -494,9 +494,167 @@ hypothesis_TwoVariances <- function(x, y,
            conf.level = 1 - a)
 }
 
+#' Generate Cumulative Distribution Function (CDF) from Density
+#'
+#' @description
+#' This function takes any continuous Probability Density Function (PDF) and creates
+#' a corresponding Cumulative Distribution Function (CDF) by numerically integrating
+#' the area under the curve.
+#'
+#' It is extremely useful for calculating probabilities like P(a < X < b) for
+#' custom or piecewise functions where standard commands like \code{pnorm} do not exist.
+#'
+#' @param density_fn A function(x) that returns the probability density. It should be vectorized (able to handle a list of numbers).
+#' @param lower_bound The starting point of the variable's domain (default is -Inf). For time/distance problems, this is usually 0.
+#'
+#' @return A new function(x) that calculates the cumulative probability P(X <= x).
+#' @export
+#'
+#' @examples
+#' # Example: A custom density function f(x) = x/2 for 0 < x < 2
+#' my_density <- function(x) {
+#'   ifelse(x >= 0 & x <= 2, x / 2, 0)
+#' }
+#'
+#' # 1. Create the CDF
+#' my_cdf <- get_cdf_from_pdf(my_density, lower_bound = 0)
+#'
+#' # 2. Calculate P(X <= 1)
+#' my_cdf(1) # Should be 0.25
+#'
+#' # 3. Calculate P(0.5 < X < 1.5) -> F(1.5) - F(0.5)
+#' my_cdf(1.5) - my_cdf(0.5)
+get_cdf_from_pdf <- function(density_fn, lower_bound = -Inf) {
 
+  # Ensure the input function is vectorized so integrate doesn't crash
+  density_fn <- Vectorize(density_fn)
 
+  # Define the new CDF function
+  cdf <- function(x) {
+    # sapply allows this to work on a list of input numbers
+    sapply(x, function(val) {
+      if (val < lower_bound) return(0)
 
+      # Integrate from the lower bound up to 'val'
+      tryCatch({
+        stats::integrate(density_fn, lower = lower_bound, upper = val)$value
+      }, error = function(e) {
+        warning(paste("Integration failed at value:", val))
+        return(NA)
+      })
+    })
+  }
+
+  return(cdf)
+}
+
+#' Calculate Mean (Expected Value) from Density Function (Juanchi)
+#'
+#' @description
+#' Calculates the center of gravity (Expected Value) of a continuous random variable
+#' given its density function f(x).
+#'
+#' Formula: Integral of x * f(x)
+#'
+#' @param density_fn The probability density function f(x).
+#' @param lower Lower bound of the domain (default -Inf).
+#' @param upper Upper bound of the domain (default Inf).
+#'
+#' @return A numeric value representing the mean.
+#'
+#' @examples
+#' # Example: f(x) = 0.2x for 0-2, and 0.4x-0.4 for 2-3
+#' f_piecewise <- function(x) {
+#'   if (x >= 0 && x <= 2) return(0.2 * x)
+#'   if (x > 2 && x <= 3) return(0.4 * x - 0.4)
+#'   return(0)
+#' }
+#'
+#' # Calculate Mean
+#' get_mean_from_pdf(f_piecewise, lower = 0, upper = 3)
+#'@export
+get_mean_from_pdf <- function(density_fn, lower = -Inf, upper = Inf) {
+  # Ensure vectorization
+  density_fn <- Vectorize(density_fn)
+
+  # Define the integrand: x * f(x)
+  integrand <- function(x) { x * density_fn(x) }
+
+  result <- stats::integrate(integrand, lower, upper)$value
+  return(result)
+}
+
+#' Calculate Variance from Density Function (Juanchi)
+#'
+#' @description
+#' Calculates the Variance of a continuous random variable given its density function.
+#' It automatically calculates the Mean first to use the variance formula.
+#'
+#' Formula: E[X^2] - (E[X])^2
+#'
+#' @param density_fn The probability density function f(x).
+#' @param lower Lower bound of the domain (default -Inf).
+#' @param upper Upper bound of the domain (default Inf).
+#'
+#' @return A numeric value representing the variance. To get Standard Deviation, apply sqrt() to the result.
+#'
+#' @examples
+#' # Example: Uniform distribution between 0 and 10 -> f(x) = 1/10
+#' f_unif <- function(x) ifelse(x >= 0 & x <= 10, 1/10, 0)
+#'
+#' # Calculate Variance
+#' var_val <- get_variance_from_pdf(f_unif, lower = 0, upper = 10)
+#' print(var_val)
+#'
+#' # Calculate Standard Deviation
+#' sqrt(var_val)
+#' @export
+get_variance_from_pdf <- function(density_fn, lower = -Inf, upper = Inf) {
+  # Ensure vectorization
+  density_fn <- Vectorize(density_fn)
+
+  # Step 1: Calculate Mean
+  mu <- get_mean_from_pdf(density_fn, lower, upper)
+
+  # Step 2: Calculate E[X^2] -> Integral of x^2 * f(x)
+  integrand_sq <- function(x) { x^2 * density_fn(x) }
+  e_x2 <- stats::integrate(integrand_sq, lower, upper)$value
+
+  # Step 3: Variance formula
+  return(e_x2 - mu^2)
+}
+
+#' Generate Cumulative Distribution Function from Density Function (Juanchi)
+#' @description This function takes any probability density function (PDF) and
+#' creates a corresponding cumulative distribution function (CDF) by integrating
+#' the area under the curve. It is useful for custom or piecewise functions
+#' where a standard "pnorm" or "pbinom" doesn't exist.
+#' @param density_fn The probability density function f(x). It must take a single numeric argument.
+#' @param lower_bound The starting point of the domain (default is -Inf). For time/distance problems, this is usually 0.
+#' @return A new function(x) that calculates the cumulative probability P(X <= x)
+#' @export
+get_cdf_from_pdf <- function(density_fn, lower_bound = -Inf) {
+
+  # We define the new CDF function inside
+  cdf <- function(x) {
+    # If x is a vector (list of numbers), we need to map over it
+    sapply(x, function(val) {
+      # If the value is below the start, probability is 0
+      if (val < lower_bound) return(0)
+
+      # Integrate the density from lower_bound up to the specific value 'val'
+      # 'tryCatch' handles potential integration errors gracefully
+      tryCatch({
+        integrate(density_fn, lower = lower_bound, upper = val)$value
+      }, error = function(e) {
+        warning(paste("Integration failed at", val))
+        return(NA)
+      })
+    })
+  }
+
+  return(cdf)
+}
 
 
 
