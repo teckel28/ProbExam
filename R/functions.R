@@ -590,7 +590,7 @@ get_mean_from_pdf <- function(density_fn, lower = -Inf, upper = Inf) {
 #' Calculates the Variance of a continuous random variable given its density function.
 #' It automatically calculates the Mean first to use the variance formula.
 #'
-#' Formula: E[X^2] - (E[X])^2
+#' Formula: E(X^2) - (E(X)^2
 #'
 #' @param density_fn The probability density function f(x).
 #' @param lower Lower bound of the domain (default -Inf).
